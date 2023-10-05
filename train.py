@@ -295,6 +295,6 @@ model.save_pretrained(output_merged_dir, safe_serialization=True)
 
 # save tokenizer for easy inference
 print("\n save tokenizer ...")
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+tokenizer = AutoTokenizer.from_pretrained(model_name, token=hftoken)
 tokenizer.save_pretrained(output_merged_dir)
 print("\n process complete!")
