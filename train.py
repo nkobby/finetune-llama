@@ -285,7 +285,7 @@ print("\n training done!")
 
 # merge weights
 print("\n merge weights ...")
-model = AutoPeftModelForCausalLM.from_pretrained(output_dir, device_map="auto", torch_dtype=torch.bfloat16)
+model = AutoPeftModelForCausalLM.from_pretrained(output_dir, device_map="auto", torch_dtype=torch.bfloat16, token=hftoken)
 model = model.merge_and_unload()
 
 print("\n save model ...")
