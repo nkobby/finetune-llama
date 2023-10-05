@@ -33,7 +33,8 @@ def load_model(model_name, bnb_config):
         max_memory = {i: max_memory for i in range(n_gpus)},
         token=hftoken
     )
-    tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=True, token=hftoken)
+    # tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=True, token=hftoken)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, token=hftoken)
 
     # Needed for LLaMA tokenizer
     tokenizer.pad_token = tokenizer.eos_token
@@ -190,16 +191,6 @@ def print_trainable_parameters(model, use_4bit=False):
         f"all params: {all_param:,d} || trainable params: {trainable_params:,d} || trainable%: {100 * trainable_params / all_param}"
     )
 
-# Load model from HF with user's token and with bitsandbytes config
-model_name = "meta-llama/Llama-2-7b-hf" 
-bnb_config = create_bnb_config()
-model, tokenizer = load_model(model_name, bnb_config)
-## Preprocess dataset
-
-max_length = get_max_length(model)
-
-dataset = preprocess_dataset(tokenizer, max_length, seed, dataset)
-
 def train(model, tokenizer, dataset, output_dir):
     # Apply preprocessing to the model to prepare it by
     # 1 - Enabling gradient checkpointing to reduce memory usage during fine-tuning
@@ -276,19 +267,34 @@ def train(model, tokenizer, dataset, output_dir):
     del trainer
     torch.cuda.empty_cache()
     
-    
+# Load model from HF with user's token and with bitsandbytes config
+model_name = "meta-llama/Llama-2-7b-hf" 
+bnb_config = create_bnb_config()
+model, tokenizer = load_model(model_name, bnb_config)
+## Preprocess dataset
+print("\n preproecessing dataset ...")
+max_length = get_max_length(model)
+dataset = preprocess_dataset(tokenizer, max_length, seed, dataset)
+
 output_dir = "results/llama2/final_checkpoint"
+
+print("\n start training ...")
 train(model, tokenizer, dataset, output_dir)
+print("\n training done!")
 
 
 # merge weights
+print("\n merge weights ...")
 model = AutoPeftModelForCausalLM.from_pretrained(output_dir, device_map="auto", torch_dtype=torch.bfloat16)
 model = model.merge_and_unload()
 
+print("\n save model ...")
 output_merged_dir = "results/llama2/final_merged_checkpoint"
 os.makedirs(output_merged_dir, exist_ok=True)
 model.save_pretrained(output_merged_dir, safe_serialization=True)
 
 # save tokenizer for easy inference
+print("\n save tokenizer ...")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 tokenizer.save_pretrained(output_merged_dir)
+print("\n process complete!")
