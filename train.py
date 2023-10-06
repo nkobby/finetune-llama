@@ -292,6 +292,7 @@ print("\n save model ...")
 output_merged_dir = "results/llama2/final_merged_checkpoint"
 os.makedirs(output_merged_dir, exist_ok=True)
 model.save_pretrained(output_merged_dir, safe_serialization=True)
+model.push_to_hub("nkobby/Llama-2-7b-hf_dolly", token=hftoken)
 
 # save tokenizer for easy inference
 print("\n save tokenizer ...")

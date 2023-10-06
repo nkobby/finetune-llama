@@ -6,3 +6,4 @@ transformers @ git+https://github.com/huggingface/transformers.git
 peft @ git+https://github.com/huggingface/peft.git
 trl @ git+https://github.com/lvwerra/trl.git
 scipy
+nvitop @ git+https://github.com/XuehaiPan/nvitop.git#egg=nvitop
